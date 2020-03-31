@@ -17,10 +17,10 @@ import (
 var input = flag.String("i", "", "input path: either a directory or a file")
 
 func usage() {
-	fmt.Fprint(os.Stderr, `Usage: i18n -i ./path/to/my/resources -o ./my/generated/test.csv OR i18n -i ./path/to/test.csv -o /some/dir/path
+	fmt.Fprint(os.Stderr, `Usage: i18n -i ./path/to/my/input
 
-provided an input path and a output path i18n determines whether or not to generate a .csv 
-file or a set of .properties files.
+provided a input directory containing *.properties files, i18n will generated a .csv of the combined contents.
+provided an input csv, i18n will generate the corresponding *.properties files.
 `)
 	os.Exit(2)
 }
@@ -31,7 +31,7 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 	if flag.NFlag() == 0 {
-		usage()
+		flag.Usage()
 	}
 	if err := i18n(); err != nil {
 		log.Fatal(err)
