@@ -11,7 +11,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"unicode"
 )
 
 var input = flag.String("i", "", "input path: either a directory or a file")
@@ -56,6 +58,41 @@ func i18n() error {
 
 type messageTable map[string][]string
 
+type alphabetic []string
+func (a alphabetic) Len() int{
+	return len(a)
+}
+func (a alphabetic) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+func (a alphabetic) Less(i, j int) bool {
+	// take the first part of the key
+	iRunes := []rune(strings.Split(a[i], ".")[0])
+	jRunes := []rune(strings.Split(a[j], ".")[0])
+
+	max := len(iRunes)
+	if max > len(jRunes) {
+		max = len(jRunes)
+	}
+
+	for idx := 0; idx < max; idx++ {
+		ir := iRunes[idx]
+		jr := jRunes[idx]
+
+		lir := unicode.ToLower(ir)
+		ljr := unicode.ToLower(jr)
+
+		if lir != ljr {
+			return lir < ljr
+		}
+
+		// the lowercase runes are the same, so compare the original
+		if ir != jr {
+			return ir < jr
+		}
+	}
+	return false
+}
 func (mt messageTable) properties(outs ...io.WriteCloser) error {
 	var sb strings.Builder
 	for idx, out := range outs {
@@ -64,7 +101,9 @@ func (mt messageTable) properties(outs ...io.WriteCloser) error {
 				return err
 			}
 		}
-		if _, err := out.Write([]byte(sb.String())); err != nil {
+		s := alphabetic(strings.Split(sb.String(), "\n"))
+		sort.Sort(s)
+		if _, err := out.Write([]byte(strings.Join(s,"\n"))); err != nil {
 			return err
 		}
 		out.Close()
@@ -81,7 +120,9 @@ func (mt messageTable) csv(out io.Writer) error {
 			return err
 		}
 	}
-	if _, err := out.Write([]byte(sb.String())); err != nil {
+	s := alphabetic(strings.Split(sb.String(), "\n"))
+	sort.Sort(s)
+	if _, err := out.Write([]byte(strings.Join(s, "\n"))); err != nil {
 		return err
 	}
 	return nil
