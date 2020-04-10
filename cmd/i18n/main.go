@@ -115,8 +115,8 @@ func (mt messageTable) properties(outs ...io.WriteCloser) error {
 func (mt messageTable) csv(out io.Writer) error {
 	var sb strings.Builder
 	for key, translations := range mt {
-		ts := strings.Join(translations, ",")
-		if _, err := sb.WriteString(fmt.Sprintf("%s,%s\n", key, ts)); err != nil {
+		ts := strings.Join(translations, "\t")
+		if _, err := sb.WriteString(fmt.Sprintf("%s\t%s\n", key, ts)); err != nil {
 			return err
 		}
 	}
@@ -241,9 +241,9 @@ func writeCsv(langs, resourceFiles []string, outputFile string) error {
 		return err
 	}
 	var sb strings.Builder
-	ls := strings.Join(langs, ",")
+	ls := strings.Join(langs, "\t")
 	// write header
-	sb.WriteString(fmt.Sprintf("%s,%s\n", "Key", ls))
+	sb.WriteString(fmt.Sprintf("%s\t%s\n", "Key", ls))
 	if _, err := fp.WriteString(sb.String()); err != nil {
 		return err
 	}
